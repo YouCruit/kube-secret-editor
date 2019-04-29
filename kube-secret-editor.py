@@ -42,19 +42,16 @@ def repr_str(dumper, data):
 
 def decode(secret):
     if 'data' in secret:
-        secret['data'] = {
-            k: base64.b64decode(v).decode('utf8')
-            for k, v in secret['data'].items()
-        }
-    return secret
+        data = {}
+        sdata = {}
+        for k, v in secret['data'].items():
+            try:
+                sdata[k] = base64.b64decode(v).decode('utf8')
+            except:
+                data[k] = v
 
-
-def encode(secret):
-    if 'data' in secret:
-        secret['data'] = {
-            k: base64.b64encode(v.encode())
-            for k, v in secret['data'].items()
-        }
+        secret['data'] = data
+        secret['stringData'] = sdata
     return secret
 
 
@@ -67,13 +64,6 @@ def edit(fname):
         fid.write(yaml.safe_dump(decoded, default_flow_style=False))
 
     subprocess.call(EDITOR.split() + [fname])
-
-    with open(fname, 'r') as fid:
-        edited = yaml.load(fid, Loader=NoDatesSafeLoader)
-        encoded = encode(edited)
-
-    with open(fname, 'w') as fid:
-        fid.write(yaml.safe_dump(encoded, default_flow_style=False))
 
 
 def main():
