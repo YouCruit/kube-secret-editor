@@ -61,9 +61,19 @@ def edit(fname):
         decoded = decode(secret)
 
     with open(fname, 'w') as fid:
-        fid.write(yaml.safe_dump(decoded, default_flow_style=False))
+        before_edit = yaml.safe_dump(decoded, default_flow_style=False)
+        fid.write(before_edit)
 
-    subprocess.call(EDITOR.split() + [fname])
+    code = subprocess.call(EDITOR.split() + [fname])
+
+    if code != 0:
+        sys.exit(1)
+
+    with open(fname, 'r') as fid:
+        after_edit = fid.read()
+
+    if after_edit == before_edit:
+        sys.exit(1)
 
 
 def main():
